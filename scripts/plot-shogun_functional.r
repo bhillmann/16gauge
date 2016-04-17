@@ -11,8 +11,6 @@ USD = sapply(c(10, 100, 1000, 10000, 100000, 1000000, 10000000, 40000000), costs
 
 USD.labels = apply(rbind(sufs, USD), 2, function(x) {print(x);sprintf('%s ($%.02f)', x['sufs'], as.numeric(x['USD']))})
 
-depths <- nobs / .06
-
 preds <- list()
 obss <- list()
 pre = 'results/predictions-4-16-16'
@@ -114,7 +112,7 @@ obsx.counts = apply(obsx.genes, 1, function(x) sum(x > 0)/sum(predx.indx))
 
 counts = data.frame(Observed=obsx.counts, Shogun=predx.counts, labels=USD.labels, depth=c(10, 100, 1000, 10000, 100000, 1000000, 10000000, 40000000))
 counts$labels = factor(counts$labels, levels=USD.labels)
-counts = counts[-(dim(counts)-1),]
+counts = counts[-(dim(counts)),]
 
 line = lm(counts$Observed~log10(counts$depth))
 
