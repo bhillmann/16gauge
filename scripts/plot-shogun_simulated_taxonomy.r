@@ -44,11 +44,14 @@ for(i in 1:length(levels)) {
   predx[is.na(predx)] <- 0
   predx <- t(apply(predx, 1, function(x) x/sum(x)))
   predx[is.na(predx)] <- 0
-  laplace.smooth = 1/length(allnames)
-  predx <- as.data.frame(log10(predx + laplace.smooth))
+#  laplace.smooth = 1/length(allnames)
+ # predx <- as.data.frame(log10(predx + laplace.smooth))
+  predx <- as.data.frame(predx)
 
-  predx$corr.spear <- unlist(apply(predx, 1, function(x) cor(unlist(predx[1,]), x, method='spear')))
-  predx$corr.pear <- unlist(apply(predx, 1, function(x) cor(unlist(predx[1,]), x, method='pear')))
+  predx$bray <- 1 - unlist(apply(predx, 1, function(x) vegdist(rbind(predx[1,], x))[1]))
+  #predx$corr.spear <- unlist(apply(predx, 1, function(x) cor(unlist(predx[1,]), x, method='spear')))
+  #predx$corr.pear <- unlist(apply(predx, 1, function(x) cor(unlist(predx[1,]), x, method='pear')))
+
   predx$group <- sapply(rownames(predx), function(x) strsplit(x, '-')[[1]][1])
   predx$depth <- sapply(rownames(predx), function(x) {
     depth = as.numeric(strsplit(x, '[.]')[[1]][2])
@@ -60,7 +63,7 @@ for(i in 1:length(levels)) {
 
 for (i in 2:length(levels)) {
   level <- levels[i]
-  plot <- ggplot(data=predictions[[level]], aes(x=depth, y=corr.spear, group=group)) + geom_smooth(aes(colour=group), method='loess', se=F) + geom_point(aes(shape=group), size=5) + xlab('Sequencing Depth (USD)') + ylab('Spearman Correlation with true metagenome') + theme_light() + ggtitle(paste('Simulated rarefaction accuracy at the', level, 'level'))
+  plot <- ggplot(data=predictions[[level]], aes(x=depth, y=bray, group=group)) + geom_smooth(aes(colour=group), method='loess', se=F) + geom_point(aes(shape=group), size=5) + xlab('Sequencing Depth (USD)') + ylab('Bray-Curtis similarity with true metagenome') + theme_light() + ggtitle(paste('Simulated rarefaction accuracy at the', level, 'level'))
   plot
   ggsave(paste('docs/shogun-mp2_', level, '.pdf', sep=''))
 }
