@@ -27,14 +27,26 @@ def main():
     tree = NCBITree()
 
     names = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+    names_check = ['k__', 'p__', 'c__', 'o__', 'f__', 'g__', 's__']
 
     with sys.stdin if args.input == '-' else open(args.input, 'r') as inf:
         df = pd.read_csv(inf)
+
+        def check(lin):
+            split = lin.split(';')
+            for dd in zip(split, names_check):
+                if not dd[0][0] == dd[1][0]:
+                    return False
+            return True
+
         mp_lineages = [tree.mp_lineage(ncbi_taxon_id) for ncbi_taxon_id in df.ncbi_taxon_id]
+
+        mp_lineages_index = [check(lin) for lin in mp_lineages]
         for i in range(1, 8):
             d = defaultdict(int)
-            for lineage, count in zip(mp_lineages, df['count']):
-                d[';'.join(lineage.split(';')[:i])] += count
+            for lineage, count, ind in zip(mp_lineages, df['count'], range(len(mp_lineages))):
+                if mp_lineages_index[ind]:
+                    d[';'.join(lineage.split(';')[:i])] += count
             dd = {'#40000000': d}
             series = pd.DataFrame(dd)
             series.to_csv(os.path.join(args.output, names[i-1] + '.csv'))

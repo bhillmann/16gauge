@@ -25,9 +25,20 @@ def main():
         os.makedirs(args.output)
 
     names = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+    names_check = ['k__', 'p__', 'c__', 'o__', 'f__', 'g__', 's__']
 
     with sys.stdin if args.input == '-' else open(args.input, 'r') as inf:
         df = pd.read_csv(inf)
+
+        def check(lin):
+            split = lin.split(';')
+            for dd in zip(split, names_check):
+                if not dd[0][0] == dd[1][0]:
+                    return False
+            return True
+
+        df_indx = [check(lin) for lin in df.ix[:, 0]]
+        df = df.ix[df_indx, :]
         for i in range(1, 8):
 
             dd = dict()
